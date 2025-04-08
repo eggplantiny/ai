@@ -1,5 +1,5 @@
 import type { EmbeddingModel } from 'ai'
-import { OLLAMA_BASE_URL } from '@runtime/mastra/constants/app.constant'
+import { OLLAMA_BASE_URL } from '@runtime/mastra/constants/modules/app.constant'
 import { embed, embedMany } from 'ai'
 import { createOllama } from 'ollama-ai-provider'
 

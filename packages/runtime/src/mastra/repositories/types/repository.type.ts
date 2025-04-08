@@ -1,4 +1,4 @@
-import type { GraphNodeMetadata, ThoughtEdge } from '@runtime/mastra/schemas'
+import type { GraphNodeMetadata, ThoughtEdge, ThoughtNode } from '@runtime/mastra/schemas'
 
 export interface Repository {
   initialize: () => Promise<void>
@@ -29,4 +29,17 @@ export interface GraphRepository extends Repository {
   getChildNodes: (id: string) => Promise<GraphNodeMetadata[]>
   findCycles: (thoughtId: string, maxDepth: number) => Promise<string[][]>
   getNodesByGoal: (goalId: string) => Promise<GraphNodeMetadata[]>
+}
+
+export interface ThoughtRepository extends Repository {
+  initialize: () => Promise<void>
+  close: () => Promise<void>
+
+  saveThought: (thought: ThoughtNode) => Promise<void>
+  getThoughtById: (id: string) => Promise<ThoughtNode | null>
+  getThoughtsByGoal: (goalId: string) => Promise<ThoughtNode[]>
+  findSimilarThoughts: (embedding: number[], limit?: number) => Promise<ThoughtNode[]>
+
+  saveEdge: (edge: ThoughtEdge) => Promise<void>
+  findCycles: (thoughtId: string, maxDepth: number) => Promise<string[][]>
 }
