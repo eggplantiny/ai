@@ -30,7 +30,7 @@ export class MemoryContextBuilder {
     }
   }
 
-  private async getRecentThoughts(sessionId: string, limit: number): Promise<Thought[]> {
+  public async getRecentThoughts(sessionId: string, limit: number): Promise<Thought[]> {
     return this.memoryRepository.getRecentThoughts(sessionId, limit)
   }
 }

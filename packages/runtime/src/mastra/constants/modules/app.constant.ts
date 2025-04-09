@@ -13,3 +13,5 @@ export const CHROMA_COLLECTION_NAME = process.env.CHROMA_COLLECTION_NAME ?? 'tho
 export const NEO4J_URI = process.env.NEO4J_URI as string
 export const NEO4J_USER = process.env.NEO4J_USER as string
 export const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD as string
+
+export const DEFAULT_SESSION_ID = 'default'

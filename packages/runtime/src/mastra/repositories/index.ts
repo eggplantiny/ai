@@ -1,5 +1,12 @@
 import type { ThoughtRepository } from './types/repository.type'
-import { CHROMA_COLLECTION_NAME, CHROMA_URL, NEO4J_PASSWORD, NEO4J_URI, NEO4J_USER } from '@runtime/mastra/constants'
+import {
+  CHROMA_COLLECTION_NAME,
+  CHROMA_URL,
+  DEFAULT_SESSION_ID,
+  NEO4J_PASSWORD,
+  NEO4J_URI,
+  NEO4J_USER,
+} from '@runtime/mastra/constants'
 
 import {
   ChromaVectorMemoryRepository,
@@ -33,3 +40,16 @@ export class MemoryRepositoryFactory {
     return repository
   }
 }
+
+function MemoryRepositorySingleton(sessionId: string) {
+  let instance: MemoryRepository | null = null
+
+  return async () => {
+    if (!instance) {
+      instance = await MemoryRepositoryFactory.create(sessionId)
+    }
+    return instance
+  }
+}
+
+export const getMemoryRepository = MemoryRepositorySingleton(DEFAULT_SESSION_ID)
