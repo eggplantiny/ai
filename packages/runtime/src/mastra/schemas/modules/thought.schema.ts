@@ -36,16 +36,18 @@ export type ThoughtNode = z.infer<typeof ThoughtNodeSchema>
 export type ThoughtEdge = z.infer<typeof ThoughtEdgeSchema>
 export type ConnectionType = z.infer<typeof ConnectionTypeEnum>
 
+export const ThoughtMetadataSchema = z.object({
+  importance: z.number().min(0).max(1).optional(),
+  topic: z.string().optional(),
+  source: z.enum(['user', 'assistant']).optional(),
+})
+
 export const ThoughtSchema = z.object({
   id: z.string().uuid(),
   content: z.string(),
   timestamp: z.date(),
   sessionId: z.string(),
-  metadata: z.object({
-    importance: z.number().min(0).max(1).optional(),
-    topic: z.string().optional(),
-    source: z.enum(['USER', 'ASSISTANT']),
-  }).optional(),
+  metadata: ThoughtMetadataSchema.optional(),
 })
 
 export type Thought = z.infer<typeof ThoughtSchema>
@@ -63,5 +65,6 @@ export const ThoughtRelationSchema = z.object({
   strength: z.number().min(0).max(1).optional(),
 })
 
+export type ThoughtMetadata = z.infer<typeof ThoughtMetadataSchema>
 export type RelationType = z.infer<typeof RelationTypeEnum>
 export type ThoughtRelation = z.infer<typeof ThoughtRelationSchema>

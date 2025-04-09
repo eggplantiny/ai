@@ -1,23 +1,29 @@
 import { Agent } from '@mastra/core/agent'
-import { ollamaToolCallingModel } from '@runtime/mastra/plugins/ai.plugin'
-import { getRecentMemoryTool, getRecentThoughtsTool } from '@runtime/mastra/tools'
+import { openai } from '@runtime/mastra/plugins/ai.plugin'
+import { retrievalMemoryTool, storeMemoryTool } from '@runtime/mastra/tools'
 
-export const memoryAgent = new Agent({
-  name: 'Memory Agent',
+export const StoreMemoryAgent = new Agent({
+  name: 'Store Memory Agent',
   instructions: `
-        You are a memory assistant that helps users recall their recent thoughts and memories.
-        
-        Your primary function is to provide users with their recent thoughts and memories. When responding:
-        - Always ask for a session ID if none is provided
-        - If the session ID isn’t in English, please translate it
-        - Include relevant details like the date and time of the thought or memory
-        - Keep responses concise but informative
-        
-        Use the getRecentThoughtsTool and getRecentMemoryTool to fetch recent thoughts and memories.
-      `,
-  model: ollamaToolCallingModel,
+You are an AI memory agent designed to save memories. Your primary function is to store and retrieve memories accurately and efficiently.
+
+**Role Definition:**
+- **Memory Storage**: Your main task is to store memories based on user input.
+`,
+  model: openai('gpt-4o-mini'),
   tools: {
-    getRecentThoughtsTool,
-    getRecentMemoryTool,
+    storeMemoryTool,
   },
+})
+
+export const RetrieveMemoryAgent = new Agent({
+  name: 'Retrieve Memory Agent',
+  instructions: `
+You are an AI memory agent designed to retrieve memories. Your primary function is to store and retrieve memories accurately and efficiently.
+
+**Role Definition:**
+- **Memory Retrieval**: Your main task is to retrieve memories based on input.
+`,
+  model: openai('gpt-4o-mini'),
+  tools: { retrievalMemoryTool },
 })

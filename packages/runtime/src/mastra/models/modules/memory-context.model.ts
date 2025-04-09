@@ -18,7 +18,7 @@ export class MemoryContextBuilder {
       contextText += '\n# Recent Messages:\n'
 
       recentThoughts.forEach((thought) => {
-        const role = thought.metadata?.source === 'USER' ? 'USER' : 'AI'
+        const role = thought.metadata?.source === 'user' ? 'user' : 'ai'
         contextText += `${role}: ${thought.content}\n`
       })
 

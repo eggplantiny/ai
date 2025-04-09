@@ -6,7 +6,6 @@ import type {
 
 import type { Thought, ThoughtRelation } from '@runtime/mastra/schemas'
 import { embedding } from '@runtime/mastra/plugins/ai.plugin'
-import { RelationTypeEnum, ThoughtSchema } from '@runtime/mastra/schemas'
 
 export class MemoryRepository implements MemoryRepositoryType {
   constructor(
@@ -30,8 +29,6 @@ export class MemoryRepository implements MemoryRepositoryType {
 
   async storeThoughtWithRelations(thought: Thought, previousThoughtId?: string): Promise<void> {
     try {
-      ThoughtSchema.parse(thought)
-
       const vector = await embedding(thought.content)
 
       await Promise.all([
@@ -49,20 +46,20 @@ export class MemoryRepository implements MemoryRepositoryType {
         await this.graphMemoryRepository.createRelation(relation)
       }
 
-      const similarThoughts = await this.vectorMemoryRepository.findSimilarThoughts(vector, 3)
-
-      const similarityRelations = similarThoughts
-        .filter(vq => vq.id !== thought.id && vq.id !== previousThoughtId)
-        .map(vq => ({
-          sourceId: thought.id,
-          targetId: vq.id,
-          relationType: RelationTypeEnum.enum.SIMILAR_TO,
-          strength: 0.8, // TODO: distance 로 정규화 필요
-        }))
-
-      for (const relation of similarityRelations) {
-        await this.graphMemoryRepository.createRelation(relation)
-      }
+      // const similarThoughts = await this.vectorMemoryRepository.findSimilarThoughts(vector, 3)
+      //
+      // const similarityRelations = similarThoughts
+      //   .filter(vq => vq.id !== thought.id && vq.id !== previousThoughtId)
+      //   .map(vq => ({
+      //     sourceId: thought.id,
+      //     targetId: vq.id,
+      //     relationType: RelationTypeEnum.enum.SIMILAR_TO,
+      //     strength: 0.8, // TODO: distance 로 정규화 필요
+      //   }))
+      //
+      // for (const relation of similarityRelations) {
+      //   await this.graphMemoryRepository.createRelation(relation)
+      // }
     }
     catch (error) {
       console.error('Error in storeThoughtWithRelations:', error)
@@ -88,7 +85,7 @@ export class MemoryRepository implements MemoryRepositoryType {
     }
     catch (error) {
       console.error('Error finding relevant memories:', error)
-      throw new Error('Failed to find relevant memories')
+      return []
     }
   }
 

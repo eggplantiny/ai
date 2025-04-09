@@ -1,7 +1,7 @@
 import * as process from 'node:process'
 import { config } from 'dotenv'
 
-config({ path: '../../.env' })
+config({ path: '../.env' })
 
 export const OPENAI_API_KEY = process.env.OPENAI_API_KEY as string
 export const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL as string

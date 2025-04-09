@@ -1,18 +1,17 @@
 import type { EmbeddingModel } from 'ai'
-import { OLLAMA_BASE_URL } from '@runtime/mastra/constants/modules/app.constant'
+import { createOpenAI } from '@ai-sdk/openai'
+import { OLLAMA_BASE_URL, OPENAI_API_KEY } from '@runtime/mastra/constants/modules/app.constant'
 import { embed, embedMany } from 'ai'
 import { createOllama } from 'ollama-ai-provider'
 
-const ollamaProvider = createOllama({
-  baseURL: OLLAMA_BASE_URL,
+export const openai = createOpenAI({
+  apiKey: OPENAI_API_KEY,
 })
 
-export const ollamaChatModel = ollamaProvider.chat('gemma3:12b', {
-  simulateStreaming: true,
-})
-export const ollamaToolCallingModel = ollamaProvider.chat('qwen2.5:14b', {
-  simulateStreaming: true,
-})
+const ollamaProvider = createOllama({ baseURL: OLLAMA_BASE_URL })
+
+export const ollamaChatModel = ollamaProvider.chat('gemma3:12b', { simulateStreaming: true })
+export const ollamaToolCallingModel = ollamaProvider.chat('qwen2.5:14b', { simulateStreaming: true })
 export const ollamaEmbeddingModel = ollamaProvider.embedding('nomic-embed-text') as EmbeddingModel<string>
 
 export async function embedding(text: string): Promise<number[]> {

@@ -307,7 +307,7 @@ export class Neo4jGraphMemoryRepository implements GraphMemoryRepositoryType {
         throw new Error(`Thought with ID ${id} not found`)
       }
 
-      const record = result.records[0].get('t')
+      const record = result.records[0]
 
       return this.mapRecordToThought(record)
     }

@@ -1,6 +1,6 @@
-import type { ConnectionType, ThoughtEdge, ThoughtNode } from '@runtime/mastra/schemas'
+import type { ConnectionType, Thought, ThoughtEdge, ThoughtMetadata, ThoughtNode } from '@runtime/mastra/schemas'
 import { genUUID } from '@runtime/mastra/libs'
-import { ThoughtEdgeSchema, ThoughtNodeSchema } from '@runtime/mastra/schemas'
+import { ThoughtEdgeSchema, ThoughtNodeSchema, ThoughtSchema } from '@runtime/mastra/schemas'
 
 export class ThoughtNodeBuilder {
   private node: Partial<ThoughtNode> = {}
@@ -96,5 +96,41 @@ export function createThoughtEdge(
     .withToNodeId(toNode.id)
     .withConnectionStrength(connectionStrength)
     .withConnectionType(connectionType)
+    .build()
+}
+
+export class ThoughtBuilder {
+  private thought: Partial<Thought> = {}
+
+  constructor() {
+    this.thought.id = genUUID()
+    this.thought.timestamp = new Date()
+  }
+
+  withContent(content: string): ThoughtBuilder {
+    this.thought.content = content
+    return this
+  }
+
+  withSessionId(sessionId: string): ThoughtBuilder {
+    this.thought.sessionId = sessionId
+    return this
+  }
+
+  withMetadata(metadata: Partial<ThoughtMetadata>): ThoughtBuilder {
+    this.thought.metadata = metadata
+    return this
+  }
+
+  build(): Thought {
+    const thought = this.thought as Thought
+    return ThoughtSchema.parse(thought)
+  }
+}
+
+export function createThought(sessionId: string, content: string) {
+  return new ThoughtBuilder()
+    .withContent(content)
+    .withSessionId(sessionId)
     .build()
 }
