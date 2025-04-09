@@ -1,5 +1,6 @@
 import { createTool } from '@mastra/core/tools'
 import { DEFAULT_SESSION_ID } from '@runtime/mastra/constants'
+import { MemoryContextBuilder } from '@runtime/mastra/models/modules/memory-context.model'
 import { createThought } from '@runtime/mastra/models/modules/thought.model'
 import { getMemoryRepository } from '@runtime/mastra/repositories'
 import { ThoughtMetadataSchema } from '@runtime/mastra/schemas'
@@ -40,16 +41,10 @@ export const retrievalMemoryTool = createTool({
     const { query } = context
 
     const memoryRepository = await getMemoryRepository()
+    const memory = await new MemoryContextBuilder(memoryRepository)
+      .buildContext(query, DEFAULT_SESSION_ID, 2000)
 
-    const recentMemories = await memoryRepository.findRelevantMemories(query, DEFAULT_SESSION_ID, 5)
-
-    if (recentMemories.length === 0) {
-      return 'No recent memories found.'
-    }
-
-    const formattedMemories = recentMemories.map(memory => `- ${memory.content}`)
-
-    return `# Related memories:\n${formattedMemories.join('\n')}`
+    return memory
   },
 })
 

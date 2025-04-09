@@ -95,10 +95,8 @@ export class CompositeThoughtRepository implements ThoughtRepository {
   }
 
   async findSimilarThoughts(embedding: number[], limit: number = 10): Promise<ThoughtNode[]> {
-    // 벡터 저장소에서 유사한 문서 검색
     const similarVectors = await this.vectorRepository.findSimilar(embedding, limit)
 
-    // 각 유사 문서의 메타데이터 로드
     const thoughts = await Promise.all(
       similarVectors.map(async ({ id }) => {
         const metadata = await this.graphRepository.getNode(id)

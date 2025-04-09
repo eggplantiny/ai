@@ -10,8 +10,8 @@ export const openai = createOpenAI({
 
 const ollamaProvider = createOllama({ baseURL: OLLAMA_BASE_URL })
 
-export const ollamaChatModel = ollamaProvider.chat('gemma3:12b', { simulateStreaming: true })
-export const ollamaToolCallingModel = ollamaProvider.chat('qwen2.5:14b', { simulateStreaming: true })
+export const ollamaChatModel = ollamaProvider.chat('PetrosStav/gemma3-tools:12b', { simulateStreaming: true })
+export const ollamaToolCallingModel = ollamaProvider.chat('PetrosStav/gemma3-tools:12b', { simulateStreaming: true })
 export const ollamaEmbeddingModel = ollamaProvider.embedding('nomic-embed-text') as EmbeddingModel<string>
 
 export async function embedding(text: string): Promise<number[]> {

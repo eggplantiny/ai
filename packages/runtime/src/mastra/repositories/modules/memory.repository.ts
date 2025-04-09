@@ -71,7 +71,8 @@ export class MemoryRepository implements MemoryRepositoryType {
     try {
       const vector = await embedding(query)
 
-      const similarThoughts = await this.vectorMemoryRepository.findSimilarThoughts(vector, limit)
+      const similarThoughts = (await this.vectorMemoryRepository.findSimilarThoughts(vector, limit))
+        .filter(x => x.distance < 0.5) // TODO: distance threshold 고도화ㅈ
 
       const thoughts: Thought[] = []
       for (const similarThought of similarThoughts) {

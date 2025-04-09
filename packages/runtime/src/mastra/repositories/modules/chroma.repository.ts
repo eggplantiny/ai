@@ -166,10 +166,11 @@ export class ChromaVectorMemoryRepository implements VectorMemoryRepositoryType 
         return []
       }
 
-      return results.ids[0].map((id: string, idx: number) => ({
-        id,
-        distance: results.distances?.[0][idx] ?? Infinity,
-      }))
+      return results.ids[0]
+        .map((id: string, idx: number) => ({
+          id,
+          distance: results.distances?.[0][idx] ?? Infinity,
+        }))
     }
     catch (error) {
       console.error('Error finding similar thoughts:', error)
