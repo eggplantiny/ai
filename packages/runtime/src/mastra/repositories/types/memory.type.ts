@@ -4,6 +4,7 @@ import type { RelationType, Thought, ThoughtRelation } from '@runtime/mastra/sch
 export interface MemoryRepositoryType extends Repository {
   storeThoughtWithRelations: (thought: Thought, previousThoughtId?: string) => Promise<void>
   findRelevantMemories: (query: string, sessionId: string, limit?: number) => Promise<Thought[]>
+  getRecentThoughts: (sessionId: string, limit?: number) => Promise<Thought[]>
 }
 
 export interface VectorMemoryRepositoryType extends Repository {
@@ -16,5 +17,6 @@ export interface GraphMemoryRepositoryType extends Repository {
   storeThought: (thought: Thought) => Promise<void>
   createRelation: (relation: ThoughtRelation) => Promise<void>
   getThoughtById: (id: string) => Promise<Thought | null>
-  getRelatedThoughts: (thoughtId: string, relationType?: RelationType) => Promise<Thought[]>
+  getRelatedThoughts: (thought: Thought, relationType?: RelationType) => Promise<Thought[]>
+  getRecentThoughts: (sessionId: string, limit?: number) => Promise<Thought[]>
 }

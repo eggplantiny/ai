@@ -91,4 +91,14 @@ export class MemoryRepository implements MemoryRepositoryType {
       throw new Error('Failed to find relevant memories')
     }
   }
+
+  async getRecentThoughts(query: string, limit = 5): Promise<Thought[]> {
+    try {
+      return await this.graphMemoryRepository.getRecentThoughts(query, limit)
+    }
+    catch (error) {
+      console.error('Error getting recent thoughts:', error)
+      throw new Error('Failed to get recent thoughts')
+    }
+  }
 }

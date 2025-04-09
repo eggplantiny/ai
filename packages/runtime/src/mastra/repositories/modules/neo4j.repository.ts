@@ -308,13 +308,8 @@ export class Neo4jGraphMemoryRepository implements GraphMemoryRepositoryType {
       }
 
       const record = result.records[0].get('t')
-      return {
-        id: record.properties.id,
-        content: record.properties.content,
-        timestamp: new Date(record.properties.timestamp),
-        sessionId: record.properties.sessionId,
-        metadata: JSON.parse(record.properties.metadata || '{}'),
-      }
+
+      return this.mapRecordToThought(record)
     }
     catch (error) {
       console.error('Error retrieving thought:', error)
@@ -325,8 +320,10 @@ export class Neo4jGraphMemoryRepository implements GraphMemoryRepositoryType {
     }
   }
 
-  async getRelatedThoughts(thoughtId: string, relationType?: RelationType): Promise<Thought[]> {
+  async getRelatedThoughts(thought: Thought, relationType?: RelationType): Promise<Thought[]> {
     const session = this.driver.session()
+    const thoughtId = thought.id
+
     try {
       const result = await session.executeRead(tx =>
         tx.run(
@@ -338,13 +335,7 @@ export class Neo4jGraphMemoryRepository implements GraphMemoryRepositoryType {
         ),
       )
 
-      return result.records.map(record => ({
-        id: record.get('related').properties.id,
-        content: record.get('related').properties.content,
-        timestamp: new Date(record.get('related').properties.timestamp),
-        sessionId: record.get('related').properties.sessionId,
-        metadata: JSON.parse(record.get('related').properties.metadata || '{}'),
-      }))
+      return result.records.map(this.mapRecordToThought)
     }
     catch (error) {
       console.error('Error retrieving related thoughts:', error)
@@ -352,6 +343,42 @@ export class Neo4jGraphMemoryRepository implements GraphMemoryRepositoryType {
     }
     finally {
       await session.close()
+    }
+  }
+
+  async getRecentThoughts(sessionId: string, limit = 5): Promise<Thought[]> {
+    const session = this.driver.session()
+    try {
+      const result = await session.executeRead(tx =>
+        tx.run(
+          `
+          MATCH (t:Thought {sessionId: $sessionId})
+          RETURN t
+          ORDER BY t.timestamp DESC
+          LIMIT ${limit}
+          `,
+          { sessionId },
+        ),
+      )
+
+      return result.records.map(this.mapRecordToThought)
+    }
+    catch (error) {
+      console.error('Error retrieving recent thoughts:', error)
+      throw new Error('Failed to retrieve recent thoughts')
+    }
+    finally {
+      await session.close()
+    }
+  }
+
+  mapRecordToThought(record: any): Thought {
+    return {
+      id: record.get('t').properties.id,
+      content: record.get('t').properties.content,
+      timestamp: new Date(record.get('t').properties.timestamp),
+      sessionId: record.get('t').properties.sessionId,
+      metadata: JSON.parse(record.get('t').properties.metadata || '{}'),
     }
   }
 }
