@@ -4,9 +4,10 @@ import { ChromaVectorRepository } from '@runtime/mastra/repositories/modules/chr
 import { CompositeThoughtRepository } from '@runtime/mastra/repositories/modules/composite.repository'
 import { Neo4jGraphRepository } from './modules/node4j.repository'
 
+export * from './types/memory.type'
 export * from './types/repository.type'
 
-export class ThoughtRepositoryFactory {
+export class ThoughtNodeRepositoryFactory {
   static async create(): Promise<ThoughtRepository> {
     const metadataRepository = new Neo4jGraphRepository(NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD)
     const vectorRepository = new ChromaVectorRepository(CHROMA_URL, CHROMA_COLLECTION_NAME)

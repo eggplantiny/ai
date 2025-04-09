@@ -25,9 +25,7 @@ export class CompositeThoughtRepository implements ThoughtRepository {
     await this.graphRepository.createNode(thought.id, {
       id: thought.id,
       content: thought.content,
-      goalId: thought.goalId,
       activationScore: thought.activationScore,
-      goalContribution: thought.goalContribution,
       evaluationScores: thought.evaluationScores,
       metadata: thought.metadata || {},
       createdAt: thought.createdAt,
@@ -55,18 +53,14 @@ export class CompositeThoughtRepository implements ThoughtRepository {
     return {
       id: metadata.id,
       content: metadata.content,
-      goalId: metadata.goalId,
       activationScore: metadata.activationScore,
-      goalContribution: metadata.goalContribution,
       evaluationScores: metadata.evaluationScores,
       metadata: metadata.metadata || {},
       createdAt: metadata.createdAt,
       updatedAt: metadata.updatedAt,
       vectorEmbedding: [] as number[],
-      purposeEmbedding: [] as number[],
       parentIds: parents.map(parent => parent.id),
       childIds: children.map(child => child.id),
-      versionHistory: [] as string[],
     }
   }
 
@@ -83,18 +77,16 @@ export class CompositeThoughtRepository implements ThoughtRepository {
         return {
           id: node.id,
           content: node.content,
-          goalId: node.goalId,
           activationScore: node.activationScore,
-          goalContribution: node.goalContribution,
           evaluationScores: node.evaluationScores,
           metadata: node.metadata || {},
           createdAt: node.createdAt,
           updatedAt: node.updatedAt,
-          vectorEmbedding: [] as number[], // 벡터는 필요할 때만 로드
-          purposeEmbedding: [] as number[], // 목적 임베딩은 필요할 때만 생성
+          vectorEmbedding: [] as number[],
+          purposeEmbedding: [] as number[],
           parentIds: parents.map(parent => parent.id),
           childIds: children.map(child => child.id),
-          versionHistory: [] as string[], // 버전 관리는 별도로 구현 필요
+          versionHistory: [] as string[],
         }
       }),
     )
@@ -121,9 +113,7 @@ export class CompositeThoughtRepository implements ThoughtRepository {
         return {
           id: metadata.id,
           content: metadata.content,
-          goalId: metadata.goalId,
           activationScore: metadata.activationScore,
-          goalContribution: metadata.goalContribution,
           evaluationScores: metadata.evaluationScores,
           metadata: metadata.metadata || {},
           createdAt: metadata.createdAt,

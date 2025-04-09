@@ -11,7 +11,6 @@ export class ThoughtNodeBuilder {
     this.node.updatedAt = new Date()
     this.node.parentIds = []
     this.node.childIds = []
-    this.node.versionHistory = []
     this.node.evaluationScores = {}
   }
 
@@ -20,28 +19,13 @@ export class ThoughtNodeBuilder {
     return this
   }
 
-  withGoalId(goalId: string): ThoughtNodeBuilder {
-    this.node.goalId = goalId
-    return this
-  }
-
   withVectorEmbedding(embedding: number[]): ThoughtNodeBuilder {
     this.node.vectorEmbedding = embedding
     return this
   }
 
-  withPurposeEmbedding(embedding: number[]): ThoughtNodeBuilder {
-    this.node.purposeEmbedding = embedding
-    return this
-  }
-
   withActivationScore(score: number): ThoughtNodeBuilder {
     this.node.activationScore = score
-    return this
-  }
-
-  withGoalContribution(score: number): ThoughtNodeBuilder {
-    this.node.goalContribution = score
     return this
   }
 

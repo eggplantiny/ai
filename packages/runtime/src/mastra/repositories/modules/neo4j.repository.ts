@@ -1,5 +1,5 @@
-import type { GraphRepository } from '@runtime/mastra/repositories'
-import type { GraphNodeMetadata, ThoughtEdge } from '@runtime/mastra/schemas'
+import type { GraphMemoryRepositoryType, GraphRepository } from '@runtime/mastra/repositories'
+import type { GraphNodeMetadata, RelationType, Thought, ThoughtEdge, ThoughtRelation } from '@runtime/mastra/schemas'
 import type { Driver } from 'neo4j-driver'
 import { auth, driver } from 'neo4j-driver'
 
@@ -34,9 +34,7 @@ export class Neo4jGraphRepository implements GraphRepository {
         id,
         properties: {
           content: metadata.content,
-          goalId: metadata.goalId,
           activationScore: metadata.activationScore,
-          goalContribution: metadata.goalContribution,
           evaluationScores: JSON.stringify(metadata.evaluationScores),
           metadata: JSON.stringify(metadata.metadata),
           createdAt: metadata.createdAt.toISOString(),
@@ -194,9 +192,7 @@ export class Neo4jGraphRepository implements GraphRepository {
     return {
       id: props.id,
       content: props.content,
-      goalId: props.goalId,
       activationScore: props.activationScore,
-      goalContribution: props.goalContribution,
       evaluationScores: props.evaluationScores ? JSON.parse(props.evaluationScores) : {},
       metadata: props.metadata ? JSON.parse(props.metadata) : {},
       createdAt: new Date(props.createdAt),
@@ -206,5 +202,156 @@ export class Neo4jGraphRepository implements GraphRepository {
 
   async close(): Promise<void> {
     await this.driver.close()
+  }
+}
+
+export class Neo4jGraphMemoryRepository implements GraphMemoryRepositoryType {
+  private driver: Driver
+
+  constructor(uri: string, username: string, password: string) {
+    this.driver = driver(uri, auth.basic(username, password))
+  }
+
+  async initialize(): Promise<void> {
+    const session = this.driver.session()
+    try {
+      await session.run(`
+        CREATE CONSTRAINT thought_id IF NOT EXISTS
+        FOR (t:Thought) REQUIRE t.id IS UNIQUE
+      `)
+    }
+    finally {
+      await session.close()
+    }
+  }
+
+  async close(): Promise<void> {
+    await this.driver.close()
+  }
+
+  async storeThought(thought: Thought): Promise<void> {
+    const session = this.driver.session()
+    try {
+      await session.executeWrite(tx =>
+        tx.run(
+          `
+          CREATE (t:Thought {
+            id: $id,
+            content: $content,
+            timestamp: $timestamp,
+            sessionId: $sessionId,
+            metadata: $metadata
+          })
+          `,
+          {
+            id: thought.id,
+            content: thought.content,
+            timestamp: thought.timestamp.toISOString(),
+            sessionId: thought.sessionId,
+            metadata: JSON.stringify(thought.metadata || {}),
+          },
+        ),
+      )
+    }
+    catch (error) {
+      console.error('Error storing thought:', error)
+      throw new Error('Failed to store thought')
+    }
+    finally {
+      await session.close()
+    }
+  }
+
+  async createRelation(relation: ThoughtRelation): Promise<void> {
+    const session = this.driver.session()
+    try {
+      await session.executeWrite(tx =>
+        tx.run(
+          `
+          MATCH (source:Thought {id: $sourceId})
+          MATCH (target:Thought {id: $targetId})
+          CREATE (source)-[r:${relation.relationType} {strength: $strength}]->(target)
+          RETURN r
+          `,
+          {
+            sourceId: relation.sourceId,
+            targetId: relation.targetId,
+            strength: relation.strength || 1.0,
+          },
+        ),
+      )
+    }
+    catch (error) {
+      console.error('Error creating relation:', error)
+      throw new Error('Failed to create relation')
+    }
+    finally {
+      await session.close()
+    }
+  }
+
+  async getThoughtById(id: string): Promise<Thought> {
+    const session = this.driver.session()
+    try {
+      const result = await session.executeRead(tx =>
+        tx.run(
+          `
+          MATCH (t:Thought {id: $id})
+          RETURN t
+          `,
+          { id },
+        ),
+      )
+
+      if (result.records.length === 0) {
+        throw new Error(`Thought with ID ${id} not found`)
+      }
+
+      const record = result.records[0].get('t')
+      return {
+        id: record.properties.id,
+        content: record.properties.content,
+        timestamp: new Date(record.properties.timestamp),
+        sessionId: record.properties.sessionId,
+        metadata: JSON.parse(record.properties.metadata || '{}'),
+      }
+    }
+    catch (error) {
+      console.error('Error retrieving thought:', error)
+      throw new Error('Failed to retrieve thought')
+    }
+    finally {
+      await session.close()
+    }
+  }
+
+  async getRelatedThoughts(thoughtId: string, relationType?: RelationType): Promise<Thought[]> {
+    const session = this.driver.session()
+    try {
+      const result = await session.executeRead(tx =>
+        tx.run(
+          `
+          MATCH (t:Thought {id: $thoughtId})-[r:${relationType}]->(related:Thought)
+          RETURN related
+          `,
+          { thoughtId },
+        ),
+      )
+
+      return result.records.map(record => ({
+        id: record.get('related').properties.id,
+        content: record.get('related').properties.content,
+        timestamp: new Date(record.get('related').properties.timestamp),
+        sessionId: record.get('related').properties.sessionId,
+        metadata: JSON.parse(record.get('related').properties.metadata || '{}'),
+      }))
+    }
+    catch (error) {
+      console.error('Error retrieving related thoughts:', error)
+      throw new Error('Failed to retrieve related thoughts')
+    }
+    finally {
+      await session.close()
+    }
   }
 }
